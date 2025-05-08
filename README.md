@@ -52,7 +52,7 @@ Before running the script, you must install required dechpendencies. Use the fol
 Clone the repository from GitHub:
 
 ```bash
-git clone https://github.com/your-username/ediop3Wire.git
+git clone https://github.com/ediop3SquadALT/ediop3Wire.git
 cd ediop3Wire
 chmod +x setup.sh && chmod +x ediop3Wire.sh
 sudo ./setup.sh
