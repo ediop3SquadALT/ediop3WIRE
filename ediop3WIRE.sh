@@ -674,7 +674,7 @@ null_probe() {
 main_menu() {
     while true; do
         clear
-        echo -e "${BLUE}=== ediop3Wire Ultimate ===${NC}"
+        echo -e "${BLUE}=== ediop3Wire ===${NC}"
         echo -e "${GREEN}1. Network Interface Control${NC}"
         echo -e "${GREEN}2. IPTables Firewall Management${NC}"
         echo -e "${GREEN}3. Network Route Control${NC}"
